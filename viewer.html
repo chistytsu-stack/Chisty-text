@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Muzan Text Pro</title>
+  <style>
+    body {
+      background: #000;
+      color: white; 
+      text-align: center; 
+      padding-top: 50px;
+      font-family: Arial;
+    }
+    .box {
+      width: 80%;
+      margin: auto;
+      background: #111;
+      padding: 20px;
+      border-radius: 10px;
+      border: 2px solid #0ff;
+    }
+  </style>
+</head>
+<body>
+
+<h1>Muzan Text Pro</h1>
+<button onclick="openRaw()">🔗 Raw Text</button>
+
+<div class="box">
+  <textarea id="content" style="width:100%; height:300px; background:#000; color:#0ff; padding:10px; border:none;">
+Loading...
+  </textarea>
+</div>
+
+<script>
+  const id = window.location.pathname.split("/").pop();
+
+  fetch(`/raw/${id}`)
+    .then(res => res.text())
+    .then(text => {
+      document.getElementById("content").value = text;
+    });
+
+  function openRaw() {
+    window.open(`/raw/${id}`, "_blank");
+  }
+</script>
+
+</body>
+</html>
