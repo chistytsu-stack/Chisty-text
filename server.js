@@ -1,25 +1,28 @@
 const express = require("express");
-const cors = require("cors");
 const app = express();
-app.use(cors());
+const path = require("path");
+
 app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 
-app.get("/", (req, res) => {
-  res.send("Chisty Text API Running...");
+// 🔥 Public folder serve
+app.use(express.static(path.join(__dirname, "public")));
+
+
+// API Example: link system
+app.post("/link", async (req, res) => {
+    const text = req.body.text;
+
+    const randomId = Math.random().toString(36).substr(2, 8);
+
+    // This will just return a dummy link (You will replace later)
+    res.json({
+        link: `${req.protocol}://${req.get("host")}/link/${randomId}`
+    });
 });
 
-app.post("/api/text", (req, res) => {
-  const { text } = req.body;
-  if (!text) return res.status(400).json({ error: "No text provided" });
 
-  const rawId = Date.now().toString(36);
-
-  res.json({
-    success: true,
-    rawId,
-    input: text
-  });
+// Run Server
+app.listen(3000, () => {
+    console.log("Server running on port 3000");
 });
-
-const port = process.env.PORT || 3000;
-app.listen(port, () => console.log("Server running on port " + port));
