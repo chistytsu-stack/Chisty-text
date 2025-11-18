@@ -1,28 +1,63 @@
 const express = require("express");
-const app = express();
+const fs = require("fs");
 const path = require("path");
+const cors = require("cors");
 
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
+const app = express();
+app.use(express.json({ limit: "10mb" }));
+app.use(cors());
 
-// 🔥 Public folder serve
+// STATIC FILES
 app.use(express.static(path.join(__dirname, "public")));
 
+// Ensure texts folder exists
+const textFolder = path.join(__dirname, "texts");
+if (!fs.existsSync(textFolder)) fs.mkdirSync(textFolder);
 
-// API Example: link system
-app.post("/link", async (req, res) => {
+
+// -----------------------------------------------
+//  API: Save text → return rawId
+// -----------------------------------------------
+app.post("/api/text", (req, res) => {
     const text = req.body.text;
+    if (!text) return res.status(400).json({ error: "No text provided" });
 
-    const randomId = Math.random().toString(36).substr(2, 8);
+    const id = Math.random().toString(36).substring(2, 8);
+    const filePath = path.join(textFolder, `${id}.txt`);
 
-    // This will just return a dummy link (You will replace later)
-    res.json({
-        link: `${req.protocol}://${req.get("host")}/link/${randomId}`
-    });
+    fs.writeFileSync(filePath, text, "utf8");
+
+    return res.json({ rawId: id });
 });
 
 
-// Run Server
-app.listen(3000, () => {
-    console.log("Server running on port 3000");
+// -----------------------------------------------
+//  RAW TEXT LINK
+// -----------------------------------------------
+app.get("/raw/:id", (req, res) => {
+    const filePath = path.join(textFolder, `${req.params.id}.txt`);
+
+    if (!fs.existsSync(filePath)) {
+        return res.status(404).send("❌ Text not found");
+    }
+
+    res.setHeader("Content-Type", "text/plain; charset=utf-8");
+    res.sendFile(filePath);
+});
+
+
+// -----------------------------------------------
+//  UI PAGE (viewer.html load)
+// -----------------------------------------------
+app.get("/link/:id", (req, res) => {
+    res.sendFile(path.join(__dirname, "public", "viewer.html"));
+});
+
+
+// -----------------------------------------------
+// SERVER START
+// -----------------------------------------------
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => {
+    console.log("🚀 Server running on port " + PORT);
 });
