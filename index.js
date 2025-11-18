@@ -1,15 +1,15 @@
 app.get("/link/:id", (req, res) => {
     const id = req.params.id;
-    const fs = require("fs");
-    const path = require("path");
 
-    const filePath = path.join(__dirname, "data", `${id}.txt`);
-
-    if (!fs.existsSync(filePath)) {
-        return res.status(404).send("❌ File not found");
+    // আপনার ডাটাবেস/স্টোরেজ থেকে ডাটা নিন
+    if (!global.linkStore || !global.linkStore[id]) {
+        return res.status(404).send("Invalid or expired link");
     }
 
-    const data = fs.readFileSync(filePath, "utf8");
-    res.setHeader("Content-Type", "text/plain");
-    return res.send(data);
+    const data = global.linkStore[id];
+
+    res.send(`
+        <h1>Your Data</h1>
+        <p>${data}</p>
+    `);
 });
